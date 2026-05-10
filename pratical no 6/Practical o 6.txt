@@ -1,0 +1,141 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import confusion_matrix
+from sklearn.preprocessing import StandardScaler
+
+print("Libraries imported successfully!")
+
+# Load Iris Dataset
+iris = load_iris()
+
+df = pd.DataFrame(iris.data, columns=iris.feature_names)
+df['species'] = iris.target
+
+print("First 5 rows of dataset:\n")
+print(df.head())
+
+# Features and Target
+X = df.iloc[:, :-1]   # All columns except last
+y = df.iloc[:, -1]    # Last column
+
+# Feature Scaling
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print("\nFeatures scaled successfully!\n")
+
+# Train Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled,
+    y,
+    test_size=0.3,
+    random_state=42
+)
+
+print("Training data size:", X_train.shape)
+print("Testing data size:", X_test.shape)
+
+# Gaussian Naive Bayes Model
+model = GaussianNB()
+
+model.fit(X_train, y_train)
+
+print("Model trained successfully!")
+
+# Prediction
+y_pred = model.predict(X_test)
+
+print("First 10 Predictions:", y_pred[:10])
+
+# Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+
+print("Confusion Matrix:\n")
+print(cm)
+
+# TP, FP, FN, TN
+TP = np.diag(cm)
+
+FP = np.sum(cm, axis=0) - TP
+
+FN = np.sum(cm, axis=1) - TP
+
+TN = np.sum(cm) - (TP + FP + FN)
+
+print("True Positives (TP):", TP)
+print("False Positives (FP):", FP)
+print("False Negatives (FN):", FN)
+print("True Negatives (TN):", TN)
+
+# Accuracy and Error Rate
+accuracy = np.sum(TP) / np.sum(cm)
+
+error_rate = 1 - accuracy
+
+print("Accuracy:", accuracy)
+print("Error Rate:", error_rate)
+
+# Precision and Recall
+precision = TP / (TP + FP)
+
+recall = TP / (TP + FN)
+
+print("Precision:", precision)
+print("Recall:", recall)
+
+# Graph 1
+plt.figure(figsize=(8, 6))
+
+sns.scatterplot(
+    x=df['sepal length (cm)'],
+    y=df['sepal width (cm)'],
+    hue=df['species'],
+    palette='Set1',
+    s=100
+)
+
+plt.plot(
+    [4, 8],
+    [2, 4.5],
+    color='black',
+    linestyle='--',
+    linewidth=2,
+    label='Reference Line'
+)
+
+plt.title("Sepal Length vs Sepal Width")
+
+plt.xlabel("Sepal Length (cm)")
+
+plt.ylabel("Sepal Width (cm)")
+
+plt.legend(title='Species')
+
+plt.show()
+
+# Graph 2
+plt.figure(figsize=(8, 6))
+
+sns.scatterplot(
+    x=df['petal length (cm)'],
+    y=df['petal width (cm)'],
+    hue=df['species'],
+    palette='Set2',
+    s=100
+)
+
+plt.title("Petal Length vs Petal Width")
+
+plt.xlabel("Petal Length (cm)")
+
+plt.ylabel("Petal Width (cm)")
+
+plt.legend(title='Species')
+
+plt.show()
