@@ -1,0 +1,68 @@
+# Import libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from google.colab import files
+
+# Upload dataset
+uploaded = files.upload()
+
+# Read CSV file
+df = pd.read_csv("iris.csv")
+
+# Display first 5 rows
+print("First 5 rows:")
+print(df.head())
+
+# Dataset shape
+print("Dataset Shape:")
+print(df.shape)
+
+# Statistical summary
+print("Statistical Summary:")
+print(df.describe())
+
+# Missing values
+print("Missing Values:")
+print(df.isnull().sum())
+
+# Dataset information
+print("Dataset Information:")
+df.info()
+
+# Data types
+print("Data Types:")
+print(df.dtypes)
+
+# Convert species column into category
+df["species"] = df["species"].astype("category")
+
+print("After converting species column:")
+print(df.head())
+
+# Min-Max Scaling
+from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()
+
+df[["sepal_length", "sepal_width", "petal_length", "petal_width"]] = scaler.fit_transform(
+    df[["sepal_length", "sepal_width", "petal_length", "petal_width"]]
+)
+
+# Round values
+df = df.round(2)
+
+print("After Min-Max Scaling:")
+print(df.head())
+
+# Label Encoding
+from sklearn.preprocessing import LabelEncoder
+
+le = LabelEncoder()
+
+df["species_encoded"] = le.fit_transform(df["species"])
+
+print("After Label Encoding:")
+print(df.head())
