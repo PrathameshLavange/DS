@@ -1,0 +1,123 @@
+# Prathamesh Lavange B28
+
+from google.colab import files
+
+# Upload dataset file
+uploaded = files.upload()   # Select Social_Network_Ads.csv
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import warnings
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    confusion_matrix,
+    classification_report
+)
+
+warnings.filterwarnings("ignore")
+
+# Load dataset
+df = pd.read_csv("Social_Network_Ads.csv")
+
+# Display first 5 rows
+print("First 5 rows:\n", df.head())
+
+# Shape of dataset
+print("\nShape:", df.shape)
+
+# Missing values
+print("\nMissing values:\n", df.isna().sum())
+
+# Features and Target
+X = df[["Age", "EstimatedSalary"]]
+y = df["Purchased"]
+
+print("\nFeatures:\n", X.head())
+print("\nTarget:\n", y.head())
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+print("Training set size:", X_train.shape)
+print("Testing set size:", X_test.shape)
+
+# Feature Scaling
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Logistic Regression Model
+model = LogisticRegression()
+model.fit(X_train_scaled, y_train)
+
+# Prediction
+y_pred = model.predict(X_test_scaled)
+
+# Evaluation
+print("Accuracy Score:", accuracy_score(y_test, y_pred))
+
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+
+print("\nPrecision Score:", precision_score(y_test, y_pred))
+
+print("Recall Score:", recall_score(y_test, y_pred))
+
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# -----------------------------------------------------
+# Logistic Regression Decision Boundary Visualization
+# -----------------------------------------------------
+
+# Get scaled weights
+w_scaled = model.coef_[0]
+b_scaled = model.intercept_[0]
+
+# Convert coefficients back to original scale
+w_original = w_scaled / scaler.scale_
+b_original = b_scaled - np.sum((scaler.mean_ / scaler.scale_) * w_scaled)
+
+# Create Age range
+x_values = np.linspace(X["Age"].min(), X["Age"].max(), 100)
+
+# Calculate decision boundary line
+y_values = -(w_original[0] * x_values + b_original) / w_original[1]
+
+# Plot training data
+plt.figure(figsize=(8, 6))
+
+plt.scatter(
+    X_train[y_train == 0]["Age"],
+    X_train[y_train == 0]["EstimatedSalary"],
+    color="red",
+    label="Class 0"
+)
+
+plt.scatter(
+    X_train[y_train == 1]["Age"],
+    X_train[y_train == 1]["EstimatedSalary"],
+    color="yellow",
+    label="Class 1"
+)
+
+# Plot decision boundary
+plt.plot(x_values, y_values, color="black", label="Decision Boundary")
+
+plt.xlabel("Age")
+plt.ylabel("Estimated Salary")
+plt.title("Logistic Regression Decision Boundary")
+
+plt.legend()
+plt.show()
